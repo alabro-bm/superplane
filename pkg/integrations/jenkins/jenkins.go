@@ -34,11 +34,26 @@ func (j *Jenkins) Icon() string {
 }
 
 func (j *Jenkins) Description() string {
-	return "Trigger and monitor Jenkins builds"
+	return "Trigger, monitor, and react to Jenkins builds"
 }
 
 func (j *Jenkins) Instructions() string {
-	return ""
+	return `To set up the Jenkins integration:
+
+1. Go to **Manage Jenkins** -> **Users** -> select your user -> **Configure**
+2. Under **API Token**, click **Add new Token**, give it a name, and click **Generate**
+3. Copy the token and paste it in the **API Token** field below
+
+### Webhook Setup (for triggers)
+
+To receive build events, install the **Jenkins Notification Plugin**:
+
+1. Go to **Manage Jenkins** -> **Manage Plugins** -> **Available** tab
+2. Search for **Notification Plugin** and install it
+3. In your Jenkins job configuration, add a **Notification Endpoint**:
+   - **Format**: JSON
+   - **Protocol**: HTTP
+   - **URL**: Use the webhook URL shown in the trigger configuration after saving the canvas`
 }
 
 func (j *Jenkins) Configuration() []configuration.Field {
@@ -76,7 +91,9 @@ func (j *Jenkins) Components() []core.Component {
 }
 
 func (j *Jenkins) Triggers() []core.Trigger {
-	return []core.Trigger{}
+	return []core.Trigger{
+		&OnBuildFinished{},
+	}
 }
 
 func (j *Jenkins) Sync(ctx core.SyncContext) error {

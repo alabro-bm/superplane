@@ -144,5 +144,6 @@ func Test__Jenkins__Triggers(t *testing.T) {
 	j := &Jenkins{}
 	triggers := j.Triggers()
 
-	require.Len(t, triggers, 0)
+	require.Len(t, triggers, 1)
+	assert.Equal(t, "jenkins.onBuildFinished", triggers[0].Name())
 }
