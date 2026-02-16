@@ -22,7 +22,7 @@ import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 To set up the Jenkins integration:
 
-1. Go to **Manage Jenkins** -> **Users** -> select your user -> **Configure**
+1. Click your **user icon** (top right) -> **Security**
 2. Under **API Token**, click **Add new Token**, give it a name, and click **Generate**
 3. Copy the token and paste it in the **API Token** field below
 
@@ -35,7 +35,7 @@ To receive build events, install the **Jenkins Notification Plugin**:
 3. In your Jenkins job configuration, add a **Notification Endpoint**:
    - **Format**: JSON
    - **Protocol**: HTTP
-   - **URL**: Use the webhook URL shown in the trigger configuration after saving the canvas
+   - **URL**: Use the webhook URL shown on the integration details page after connecting
 
 <a id="on-build-finished"></a>
 
