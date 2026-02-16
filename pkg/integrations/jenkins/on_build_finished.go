@@ -147,10 +147,20 @@ func (t *OnBuildFinished) HandleWebhook(ctx core.WebhookRequestContext) (int, er
 		return http.StatusOK, nil
 	}
 
+	var metadata OnBuildFinishedMetadata
+	if err := mapstructure.Decode(ctx.Metadata, &metadata); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to decode metadata: %w", err)
+	}
+
+	jobURL := payload.URL
+	if metadata.Job != nil && metadata.Job.URL != "" {
+		jobURL = metadata.Job.URL
+	}
+
 	eventPayload := map[string]any{
 		"job": map[string]any{
 			"name": payload.Name,
-			"url":  payload.URL,
+			"url":  jobURL,
 		},
 		"build": map[string]any{
 			"number": payload.Build.Number,
