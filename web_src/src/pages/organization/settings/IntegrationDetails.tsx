@@ -310,8 +310,8 @@ export function IntegrationDetails({ organizationId }: IntegrationDetailsProps) 
           </div>
         </div>
 
-        {integration.status?.metadata?.webhookURL && (
-          <WebhookURLSection url={integration.status.metadata.webhookURL as string} />
+        {typeof integration.status?.metadata?.webhookURL === "string" && (
+          <WebhookURLSection url={integration.status.metadata.webhookURL} />
         )}
 
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
