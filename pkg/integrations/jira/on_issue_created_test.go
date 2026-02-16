@@ -193,8 +193,23 @@ func Test__OnIssueCreated__Setup(t *testing.T) {
 	testProject := Project{ID: "10000", Key: "TEST", Name: "Test Project"}
 	trigger := OnIssueCreated{}
 
+	t.Run("api token auth -> error", func(t *testing.T) {
+		integrationCtx := &contexts.IntegrationContext{
+			Configuration: map[string]any{"authType": AuthTypeAPIToken},
+		}
+		err := trigger.Setup(core.TriggerContext{
+			Integration:   integrationCtx,
+			Metadata:      &contexts.MetadataContext{},
+			Configuration: map[string]any{"project": "TEST"},
+		})
+
+		require.ErrorContains(t, err, "webhook triggers require OAuth")
+	})
+
 	t.Run("missing project -> error", func(t *testing.T) {
-		integrationCtx := &contexts.IntegrationContext{}
+		integrationCtx := &contexts.IntegrationContext{
+			Configuration: map[string]any{"authType": AuthTypeOAuth},
+		}
 		err := trigger.Setup(core.TriggerContext{
 			Integration:   integrationCtx,
 			Metadata:      &contexts.MetadataContext{},
@@ -206,6 +221,7 @@ func Test__OnIssueCreated__Setup(t *testing.T) {
 
 	t.Run("project not found in metadata -> error", func(t *testing.T) {
 		integrationCtx := &contexts.IntegrationContext{
+			Configuration: map[string]any{"authType": AuthTypeOAuth},
 			Metadata: Metadata{
 				Projects: []Project{testProject},
 			},
@@ -221,6 +237,7 @@ func Test__OnIssueCreated__Setup(t *testing.T) {
 
 	t.Run("valid setup -> metadata set, webhook requested", func(t *testing.T) {
 		integrationCtx := &contexts.IntegrationContext{
+			Configuration: map[string]any{"authType": AuthTypeOAuth},
 			Metadata: Metadata{
 				Projects: []Project{testProject},
 			},
