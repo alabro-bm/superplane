@@ -98,7 +98,16 @@ func (t *OnIssueCreated) Configuration() []configuration.Field {
 }
 
 func (t *OnIssueCreated) Setup(ctx core.TriggerContext) error {
-	err := ensureProjectInMetadata(
+	authType, err := ctx.Integration.GetConfig("authType")
+	if err != nil {
+		return fmt.Errorf("failed to get authType: %w", err)
+	}
+
+	if string(authType) != AuthTypeOAuth {
+		return fmt.Errorf("webhook triggers require OAuth authentication; API Token integrations do not support webhooks")
+	}
+
+	err = ensureProjectInMetadata(
 		ctx.Metadata,
 		ctx.Integration,
 		ctx.Configuration,

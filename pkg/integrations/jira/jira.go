@@ -288,14 +288,20 @@ func (j *Jira) oauthSync(ctx core.SyncContext, config Configuration) error {
 		}
 	}
 
-	// No valid tokens, need to authorize
-	state, err := crypto.Base64String(32)
-	if err != nil {
-		return fmt.Errorf("failed to generate state: %v", err)
-	}
+	// No valid tokens, need to authorize.
+	// Reuse existing state if an OAuth flow is already in progress to avoid
+	// invalidating a callback the user has not completed yet.
+	state := metadata.State
+	if state == "" {
+		var err error
+		state, err = crypto.Base64String(32)
+		if err != nil {
+			return fmt.Errorf("failed to generate state: %v", err)
+		}
 
-	metadata.State = state
-	ctx.Integration.SetMetadata(metadata)
+		metadata.State = state
+		ctx.Integration.SetMetadata(metadata)
+	}
 
 	redirectURI := fmt.Sprintf("%s/api/v1/integrations/%s/callback", ctx.WebhooksBaseURL, ctx.Integration.ID().String())
 	authURL := buildAuthorizationURL(*config.ClientID, redirectURI, state)
@@ -430,6 +436,24 @@ func (j *Jira) handleOAuthCallback(ctx core.HTTPRequestContext) {
 	metadata.CloudID = cloudID
 	metadata.State = ""
 	ctx.Integration.SetMetadata(metadata)
+
+	// Load projects and mark integration as ready so the user does not
+	// have to wait for the next sync cycle.
+	client, err := NewClient(ctx.HTTP, ctx.Integration)
+	if err != nil {
+		ctx.Logger.Errorf("failed to create client after OAuth: %v", err)
+	} else {
+		projects, err := client.ListProjects()
+		if err != nil {
+			ctx.Logger.Errorf("failed to list projects after OAuth: %v", err)
+		} else {
+			metadata.Projects = projects
+			ctx.Integration.SetMetadata(metadata)
+		}
+	}
+
+	ctx.Integration.Ready()
+	_ = ctx.Integration.ScheduleResync(tokenResponse.GetExpiration())
 
 	// Remove browser action
 	ctx.Integration.RemoveBrowserAction()
