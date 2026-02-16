@@ -1,7 +1,6 @@
 package jira
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -234,6 +233,10 @@ func (j *Jira) oauthSync(ctx core.SyncContext, config Configuration) error {
 		return fmt.Errorf("clientId is required")
 	}
 
+	if config.ClientSecret == nil || *config.ClientSecret == "" {
+		return fmt.Errorf("clientSecret is required")
+	}
+
 	metadata := Metadata{}
 	_ = mapstructure.Decode(ctx.Integration.GetMetadata(), &metadata)
 
@@ -321,34 +324,7 @@ func (j *Jira) HandleRequest(ctx core.HTTPRequestContext) {
 		return
 	}
 
-	if strings.HasSuffix(ctx.Request.URL.Path, "/actions/getFailedWebhooks") {
-		j.handleGetFailedWebhooks(ctx)
-		return
-	}
-
-	if strings.HasSuffix(ctx.Request.URL.Path, "/actions/getFailedWebhooks") {
-		j.handleGetFailedWebhooks(ctx)
-		return
-	}
-}
-
-func (j *Jira) handleGetFailedWebhooks(ctx core.HTTPRequestContext) {
-	client, err := NewClient(ctx.HTTP, ctx.Integration)
-	if err != nil {
-		ctx.Logger.Errorf("handleGetFailedWebhooks: failed to create client: %v", err)
-		http.Error(ctx.Response, fmt.Sprintf("failed to create client: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	failed, err := client.GetFailedWebhooks()
-	if err != nil {
-		ctx.Logger.Errorf("handleGetFailedWebhooks: error: %v", err)
-		http.Error(ctx.Response, fmt.Sprintf("error getting failed webhooks: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Response.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(ctx.Response).Encode(failed)
+	http.NotFound(ctx.Response, ctx.Request)
 }
 
 func (j *Jira) handleOAuthCallback(ctx core.HTTPRequestContext) {
@@ -414,7 +390,19 @@ func (j *Jira) handleOAuthCallback(ctx core.HTTPRequestContext) {
 		return
 	}
 
-	// Use first resource (most users have only one)
+	if len(resources) > 1 {
+		names := make([]string, len(resources))
+		for i, r := range resources {
+			names[i] = fmt.Sprintf("%s (%s)", r.Name, r.URL)
+		}
+		ctx.Logger.Errorf("multiple Jira sites found: %v", names)
+		http.Error(ctx.Response,
+			fmt.Sprintf("multiple Jira Cloud sites found: %v -- restrict the OAuth app to a single site", names),
+			http.StatusBadRequest,
+		)
+		return
+	}
+
 	cloudID := resources[0].ID
 
 	// Store tokens as secrets
