@@ -101,7 +101,6 @@ import {
   componentMappers as jenkinsComponentMappers,
   triggerRenderers as jenkinsTriggerRenderers,
   eventStateRegistry as jenkinsEventStateRegistry,
-  customFieldRenderers as jenkinsCustomFieldRenderers,
 } from "./jenkins/index";
 import {
   componentMappers as circleCIComponentMappers,
@@ -262,7 +261,6 @@ const appCustomFieldRenderers: Record<string, Record<string, CustomFieldRenderer
   github: githubCustomFieldRenderers,
   prometheus: prometheusCustomFieldRenderers,
   dockerhub: dockerhubCustomFieldRenderers,
-  jenkins: jenkinsCustomFieldRenderers,
 };
 
 /**

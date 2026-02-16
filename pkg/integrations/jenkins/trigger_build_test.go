@@ -145,7 +145,7 @@ func Test__TriggerBuild__Setup(t *testing.T) {
 		metadata, ok := metadataCtx.Metadata.(TriggerBuildNodeMetadata)
 		require.True(t, ok)
 		assert.Equal(t, "my-job", metadata.Job.Name)
-		assert.NotEmpty(t, metadata.WebhookURL)
+		require.Len(t, appCtx.WebhookRequests, 1)
 	})
 
 	t.Run("already set up for same job -> no-op", func(t *testing.T) {
@@ -159,8 +159,7 @@ func Test__TriggerBuild__Setup(t *testing.T) {
 
 		metadataCtx := &contexts.MetadataContext{
 			Metadata: TriggerBuildNodeMetadata{
-				Job:        &JobInfo{Name: "my-job", URL: "https://jenkins.example.com/job/my-job/"},
-				WebhookURL: "http://localhost:3000/api/v1/webhooks/test-id",
+				Job: &JobInfo{Name: "my-job", URL: "https://jenkins.example.com/job/my-job/"},
 			},
 		}
 

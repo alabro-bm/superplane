@@ -35,8 +35,7 @@ type Parameter struct {
 }
 
 type TriggerBuildNodeMetadata struct {
-	Job        *JobInfo `json:"job" mapstructure:"job"`
-	WebhookURL string   `json:"webhookUrl,omitempty" mapstructure:"webhookUrl"`
+	Job *JobInfo `json:"job" mapstructure:"job"`
 }
 
 type TriggerBuildExecutionMetadata struct {
@@ -198,8 +197,8 @@ func (t *TriggerBuild) Setup(ctx core.SetupContext) error {
 	}
 
 	// If already set up for the same job, skip re-setup.
-	if metadata.Job != nil && metadata.Job.Name == spec.Job && metadata.WebhookURL != "" {
-		return nil
+	if metadata.Job != nil && metadata.Job.Name == spec.Job {
+		return ctx.Integration.RequestWebhook(WebhookConfiguration{})
 	}
 
 	client, err := NewClient(ctx.HTTP, ctx.Integration)
@@ -212,8 +211,7 @@ func (t *TriggerBuild) Setup(ctx core.SetupContext) error {
 		return fmt.Errorf("error finding job %s: %v", spec.Job, err)
 	}
 
-	webhookURL, err := ctx.Webhook.Setup()
-	if err != nil {
+	if err := ctx.Integration.RequestWebhook(WebhookConfiguration{}); err != nil {
 		return err
 	}
 
@@ -222,7 +220,6 @@ func (t *TriggerBuild) Setup(ctx core.SetupContext) error {
 			Name: job.FullName,
 			URL:  job.URL,
 		},
-		WebhookURL: webhookURL,
 	})
 }
 

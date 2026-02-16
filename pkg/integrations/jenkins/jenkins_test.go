@@ -92,6 +92,41 @@ func Test__Jenkins__Sync(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, "ready", appCtx.State)
+		require.Len(t, appCtx.WebhookRequests, 1)
+	})
+
+	t.Run("successful sync -> stores webhook URL in metadata", func(t *testing.T) {
+		httpContext := &contexts.HTTPContext{
+			Responses: []*http.Response{
+				{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(strings.NewReader(`{"mode":"NORMAL","url":"https://jenkins.example.com/"}`)),
+				},
+			},
+		}
+
+		appCtx := &contexts.IntegrationContext{
+			Configuration: map[string]any{
+				"url":      "https://jenkins.example.com",
+				"username": "admin",
+				"apiToken": "test-token",
+			},
+		}
+
+		err := j.Sync(core.SyncContext{
+			Configuration:   appCtx.Configuration,
+			HTTP:            httpContext,
+			Integration:     appCtx,
+			WebhooksBaseURL: "https://superplane.example.com",
+		})
+
+		require.NoError(t, err)
+
+		metadata, ok := appCtx.Metadata.(map[string]any)
+		require.True(t, ok)
+		webhookURL, ok := metadata["webhookURL"].(string)
+		require.True(t, ok)
+		assert.Contains(t, webhookURL, "https://superplane.example.com/api/v1/webhooks/")
 	})
 
 	t.Run("auth failure -> error", func(t *testing.T) {

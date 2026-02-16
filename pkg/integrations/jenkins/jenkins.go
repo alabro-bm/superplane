@@ -40,7 +40,7 @@ func (j *Jenkins) Description() string {
 func (j *Jenkins) Instructions() string {
 	return `To set up the Jenkins integration:
 
-1. Go to **Manage Jenkins** -> **Users** -> select your user -> **Configure**
+1. Click your **user icon** (top right) -> **Security**
 2. Under **API Token**, click **Add new Token**, give it a name, and click **Generate**
 3. Copy the token and paste it in the **API Token** field below
 
@@ -53,7 +53,7 @@ To receive build events, install the **Jenkins Notification Plugin**:
 3. In your Jenkins job configuration, add a **Notification Endpoint**:
    - **Format**: JSON
    - **Protocol**: HTTP
-   - **URL**: Use the webhook URL shown in the trigger configuration after saving the canvas`
+   - **URL**: Use the webhook URL shown on the integration details page after connecting`
 }
 
 func (j *Jenkins) Configuration() []configuration.Field {
@@ -124,17 +124,24 @@ func (j *Jenkins) Sync(ctx core.SyncContext) error {
 		return fmt.Errorf("error verifying credentials: %v", err)
 	}
 
-	// Store the webhooks base URL in integration metadata so that
-	// the integration details page can display the webhook URL
-	// once a component requests a webhook.
-	if ctx.WebhooksBaseURL != "" {
-		metadata, _ := ctx.Integration.GetMetadata().(map[string]any)
-		if metadata == nil {
-			metadata = map[string]any{}
-		}
-		metadata["webhooksBaseURL"] = ctx.WebhooksBaseURL
-		ctx.Integration.SetMetadata(metadata)
+	// Create a shared integration-level webhook so the URL is available
+	// immediately on the integration details page. Components and triggers
+	// will reuse this webhook via RequestWebhook + CompareConfig.
+	webhookID, err := ctx.Integration.EnsureIntegrationWebhook(WebhookConfiguration{})
+	if err != nil {
+		return fmt.Errorf("error ensuring webhook: %v", err)
 	}
+
+	metadata, _ := ctx.Integration.GetMetadata().(map[string]any)
+	if metadata == nil {
+		metadata = map[string]any{}
+	}
+
+	if webhookID != nil && ctx.WebhooksBaseURL != "" {
+		metadata["webhookURL"] = fmt.Sprintf("%s/api/v1/webhooks/%s", ctx.WebhooksBaseURL, webhookID.String())
+	}
+
+	ctx.Integration.SetMetadata(metadata)
 
 	ctx.Integration.Ready()
 	return nil
