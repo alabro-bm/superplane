@@ -265,6 +265,12 @@ func (t *TriggerBuild) Execute(ctx core.ExecutionContext) error {
 		return err
 	}
 
+	// NOTE: The job name is not unique per execution. If multiple executions
+	// trigger builds of the same job concurrently, the webhook may match the
+	// wrong execution. The polling fallback handles this correctly since each
+	// execution tracks its own queueItemID. The Jenkins Notification Plugin
+	// payload does not include queue item IDs, so webhook matching is limited
+	// to job name for now.
 	if err := ctx.ExecutionState.SetKV(buildJobKey, spec.Job); err != nil {
 		return err
 	}
