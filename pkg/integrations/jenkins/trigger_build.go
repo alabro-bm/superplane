@@ -315,6 +315,10 @@ func (t *TriggerBuild) HandleWebhook(ctx core.WebhookRequestContext) (int, error
 		return http.StatusInternalServerError, fmt.Errorf("error decoding metadata: %w", err)
 	}
 
+	if metadata.Job == nil {
+		return http.StatusInternalServerError, fmt.Errorf("metadata.Job is nil for execution")
+	}
+
 	metadata.Build = &BuildInfo{
 		Number:   payload.Build.Number,
 		URL:      payload.Build.FullURL,
@@ -383,6 +387,10 @@ func (t *TriggerBuild) poll(ctx core.ActionContext) error {
 	metadata := TriggerBuildExecutionMetadata{}
 	if err := mapstructure.Decode(ctx.Metadata.Get(), &metadata); err != nil {
 		return fmt.Errorf("failed to decode metadata: %w", err)
+	}
+
+	if metadata.Job == nil {
+		return fmt.Errorf("metadata.Job is nil for execution")
 	}
 
 	client, err := NewClient(ctx.HTTP, ctx.Integration)

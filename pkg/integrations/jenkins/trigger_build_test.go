@@ -283,6 +283,32 @@ func Test__TriggerBuild__Poll(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("nil job metadata -> error", func(t *testing.T) {
+		err := component.poll(core.ActionContext{
+			Configuration: map[string]any{
+				"job": "my-job",
+			},
+			HTTP: &contexts.HTTPContext{},
+			Integration: &contexts.IntegrationContext{
+				Configuration: map[string]any{
+					"url":      "https://jenkins.example.com",
+					"username": "admin",
+					"apiToken": "test-token",
+				},
+			},
+			Metadata: &contexts.MetadataContext{
+				Metadata: TriggerBuildExecutionMetadata{
+					QueueItemID: 42,
+				},
+			},
+			ExecutionState: &contexts.ExecutionStateContext{KVs: map[string]string{}},
+			Requests:       &contexts.RequestContext{},
+		})
+
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "metadata.Job is nil")
+	})
+
 	t.Run("build still in queue -> reschedule", func(t *testing.T) {
 		httpContext := &contexts.HTTPContext{
 			Responses: []*http.Response{
@@ -563,6 +589,30 @@ func Test__TriggerBuild__HandleWebhook(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		require.NoError(t, err)
+	})
+
+	t.Run("nil job metadata -> internal server error", func(t *testing.T) {
+		body := buildWebhookBody("my-job", "COMPLETED", "SUCCESS", 5)
+		metadataCtx := &contexts.MetadataContext{
+			Metadata: TriggerBuildExecutionMetadata{
+				QueueItemID: 42,
+			},
+		}
+		execState := &contexts.ExecutionStateContext{KVs: map[string]string{}}
+
+		status, err := component.HandleWebhook(core.WebhookRequestContext{
+			Body: body,
+			FindExecutionByKV: func(key, value string) (*core.ExecutionContext, error) {
+				return &core.ExecutionContext{
+					Metadata:       metadataCtx,
+					ExecutionState: execState,
+				}, nil
+			},
+		})
+
+		assert.Equal(t, http.StatusInternalServerError, status)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "metadata.Job is nil")
 	})
 
 	t.Run("build succeeded -> emit passed", func(t *testing.T) {

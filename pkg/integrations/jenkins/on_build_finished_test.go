@@ -268,7 +268,7 @@ func Test__OnBuildFinished__HandleWebhook(t *testing.T) {
 		assert.Equal(t, "SUCCESS", build["result"])
 	})
 
-	t.Run("build finalized -> emit event", func(t *testing.T) {
+	t.Run("finalized phase -> ok ignored", func(t *testing.T) {
 		body := buildWebhookBody("my-job", "FINALIZED", "FAILURE", 43)
 		eventCtx := &contexts.EventContext{}
 
@@ -280,13 +280,6 @@ func Test__OnBuildFinished__HandleWebhook(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		require.NoError(t, err)
-		require.Equal(t, 1, eventCtx.Count())
-
-		data, ok := eventCtx.Payloads[0].Data.(map[string]any)
-		require.True(t, ok)
-
-		build, ok := data["build"].(map[string]any)
-		require.True(t, ok)
-		assert.Equal(t, "FAILURE", build["result"])
+		assert.Equal(t, 0, eventCtx.Count())
 	})
 }

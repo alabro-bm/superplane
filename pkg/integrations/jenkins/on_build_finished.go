@@ -134,7 +134,7 @@ func (t *OnBuildFinished) HandleWebhook(ctx core.WebhookRequestContext) (int, er
 		return http.StatusOK, nil
 	}
 
-	if payload.Build.Phase != "COMPLETED" && payload.Build.Phase != "FINALIZED" {
+	if payload.Build.Phase != "COMPLETED" {
 		return http.StatusOK, nil
 	}
 
