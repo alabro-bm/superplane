@@ -1,4 +1,4 @@
-package jfrog_artifactory
+package jfrogartifactory
 
 import (
 	"fmt"
