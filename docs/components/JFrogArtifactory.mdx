@@ -4,6 +4,12 @@ title: "JFrog Artifactory"
 
 Manage artifacts in JFrog Artifactory repositories
 
+## Triggers
+
+<CardGrid>
+  <LinkCard title="On Artifact Uploaded" href="#on-artifact-uploaded" description="Triggers when an artifact is deployed to JFrog Artifactory" />
+</CardGrid>
+
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 ## Actions
@@ -22,7 +28,33 @@ To set up the JFrog Artifactory integration:
 2. Go to **User Menu** (top right) -> **Edit Profile** -> **Authentication Settings**
 3. Click **Generate an Identity Token**
 4. Copy the token and paste it in the **Access Token** field below
-5. Enter your Artifactory base URL (e.g. https://mycompany.jfrog.io/artifactory)
+5. Enter your JFrog Platform URL without the /artifactory suffix (e.g. https://mycompany.jfrog.io)
+
+<a id="on-artifact-uploaded"></a>
+
+## On Artifact Uploaded
+
+The On Artifact Uploaded trigger starts a workflow execution when an artifact is deployed to JFrog Artifactory.
+
+### Configuration
+
+- **Repository** (optional): Filter events to a specific repository. Leave empty to trigger for all repositories.
+
+### Outputs
+
+- **Default channel**: Emits artifact deploy data including repo, path, name, size, and sha256.
+
+### Example Data
+
+```json
+{
+  "name": "artifact-1.0.jar",
+  "path": "com/example/artifact-1.0.jar",
+  "repo": "libs-release-local",
+  "sha256": "abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567",
+  "size": 12345
+}
+```
 
 <a id="delete-artifact"></a>
 
