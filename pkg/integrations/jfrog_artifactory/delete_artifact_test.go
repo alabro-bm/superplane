@@ -131,7 +131,9 @@ func Test__DeleteArtifact__Execute(t *testing.T) {
 		assert.Equal(t, DeleteArtifactPayloadType, execState.Type)
 		require.Len(t, execState.Payloads, 1)
 
-		payload, ok := execState.Payloads[0].(map[string]any)
+		wrapped, ok := execState.Payloads[0].(map[string]any)
+		require.True(t, ok)
+		payload, ok := wrapped["data"].(map[string]any)
 		require.True(t, ok)
 		assert.Equal(t, "libs-release-local", payload["repo"])
 		assert.Equal(t, "com/example/artifact-1.0.jar", payload["path"])
