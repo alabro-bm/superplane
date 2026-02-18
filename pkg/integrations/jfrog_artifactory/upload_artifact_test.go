@@ -130,7 +130,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io",
+				"url":         "https://mycompany.jfrog.io",
 				"accessToken": "test-token",
 			},
 		}
@@ -169,7 +169,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io",
+				"url":         "https://mycompany.jfrog.io",
 				"accessToken": "test-token",
 			},
 		}
