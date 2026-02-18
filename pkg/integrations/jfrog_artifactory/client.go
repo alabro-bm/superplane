@@ -1,12 +1,14 @@
 package jfrog_artifactory
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/superplanehq/superplane/pkg/core"
 )
 
@@ -71,7 +73,15 @@ func (c *Client) execRequest(method, requestURL string, body io.Reader, contentT
 	return res, nil, fmt.Errorf("request got %d code: %s", res.StatusCode, string(responseBody))
 }
 
+// apiURL builds a URL for Artifactory REST API calls.
+// The BaseURL is the platform URL (e.g. https://mycompany.jfrog.io),
+// so Artifactory-specific paths are prefixed with /artifactory.
 func (c *Client) apiURL(path string) string {
+	return fmt.Sprintf("%s/artifactory%s", c.BaseURL, path)
+}
+
+// platformURL builds a URL for JFrog Platform-level API calls (e.g. webhooks).
+func (c *Client) platformURL(path string) string {
 	return fmt.Sprintf("%s%s", c.BaseURL, path)
 }
 
@@ -181,6 +191,94 @@ func (c *Client) DeleteArtifact(repoKey, path string) error {
 	path = strings.TrimPrefix(path, "/")
 	requestURL := c.apiURL(fmt.Sprintf("/%s/%s", repoKey, path))
 	_, _, err := c.execRequest(http.MethodDelete, requestURL, nil, "", http.StatusNoContent)
+	return err
+}
+
+// JFrogWebhookEventFilter represents the event filter for a JFrog webhook.
+type JFrogWebhookEventFilter struct {
+	Domain     string                `json:"domain"`
+	EventTypes []string              `json:"event_types"`
+	Criteria   *JFrogWebhookCriteria `json:"criteria,omitempty"`
+}
+
+// JFrogWebhookCriteria represents filtering criteria for a JFrog webhook.
+type JFrogWebhookCriteria struct {
+	RepoKeys []string `json:"repo_keys,omitempty"`
+}
+
+// JFrogWebhookHandlerDef represents a handler definition in a JFrog webhook.
+type JFrogWebhookHandlerDef struct {
+	HandlerType         string `json:"handler_type"`
+	URL                 string `json:"url"`
+	Secret              string `json:"secret"`
+	UseSecretForSigning bool   `json:"use_secret_for_signing"`
+}
+
+// CreateWebhookRequest is the request body for creating a JFrog webhook.
+type CreateWebhookRequest struct {
+	Key         string                   `json:"key"`
+	Description string                   `json:"description"`
+	Enabled     bool                     `json:"enabled"`
+	EventFilter JFrogWebhookEventFilter  `json:"event_filter"`
+	Handlers    []JFrogWebhookHandlerDef `json:"handlers"`
+}
+
+// CreateWebhookResponse is the response from creating a JFrog webhook.
+type CreateWebhookResponse struct {
+	Key string `json:"key"`
+}
+
+// CreateWebhook registers a webhook in JFrog Artifactory for artifact deploy events.
+// Returns the webhook key used to identify it for later deletion.
+func (c *Client) CreateWebhook(webhookURL, secret, repoKey string) (string, error) {
+	key := fmt.Sprintf("superplane-%s", uuid.New().String())
+
+	var criteria *JFrogWebhookCriteria
+	if repoKey != "" {
+		criteria = &JFrogWebhookCriteria{RepoKeys: []string{repoKey}}
+	}
+
+	reqBody := CreateWebhookRequest{
+		Key:         key,
+		Description: "Managed by SuperPlane",
+		Enabled:     true,
+		EventFilter: JFrogWebhookEventFilter{
+			Domain:     "artifact",
+			EventTypes: []string{"deployed"},
+			Criteria:   criteria,
+		},
+		Handlers: []JFrogWebhookHandlerDef{
+			{
+				HandlerType:         "webhook",
+				URL:                 webhookURL,
+				Secret:              secret,
+				UseSecretForSigning: true,
+			},
+		},
+	}
+
+	bodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("error marshaling webhook request: %v", err)
+	}
+
+	_, responseBody, err := c.execRequest(http.MethodPost, c.platformURL("/event/api/v1/subscriptions"), bytes.NewReader(bodyBytes), "application/json")
+	if err != nil {
+		return "", fmt.Errorf("error creating webhook: %v", err)
+	}
+
+	var resp CreateWebhookResponse
+	if err := json.Unmarshal(responseBody, &resp); err != nil || resp.Key == "" {
+		return key, nil
+	}
+
+	return resp.Key, nil
+}
+
+// DeleteWebhook removes a webhook from JFrog Artifactory by its key.
+// A 404 response is treated as success since the webhook is already gone.
+func (c *Client) DeleteWebhook(key string) error {
+	_, _, err := c.execRequest(http.MethodDelete, c.platformURL(fmt.Sprintf("/event/api/v1/subscriptions/%s", key)), nil, "", http.StatusNoContent, http.StatusNotFound)
 	return err
 }
 

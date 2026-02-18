@@ -18,7 +18,7 @@ func Test__JFrogArtifactory__Sync(t *testing.T) {
 	t.Run("no url -> error", func(t *testing.T) {
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "",
+				"url":         "",
 				"accessToken": "test-token",
 			},
 		}
@@ -34,7 +34,7 @@ func Test__JFrogArtifactory__Sync(t *testing.T) {
 	t.Run("no accessToken -> error", func(t *testing.T) {
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io/artifactory",
+				"url":         "https://mycompany.jfrog.io",
 				"accessToken": "",
 			},
 		}
@@ -59,7 +59,7 @@ func Test__JFrogArtifactory__Sync(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io/artifactory",
+				"url":         "https://mycompany.jfrog.io",
 				"accessToken": "test-token",
 			},
 		}
@@ -86,7 +86,7 @@ func Test__JFrogArtifactory__Sync(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io/artifactory",
+				"url":         "https://mycompany.jfrog.io",
 				"accessToken": "invalid-token",
 			},
 		}
@@ -115,7 +115,8 @@ func Test__JFrogArtifactory__Triggers(t *testing.T) {
 	j := &JFrogArtifactory{}
 	triggers := j.Triggers()
 
-	require.Len(t, triggers, 0)
+	require.Len(t, triggers, 1)
+	assert.Equal(t, "jfrogArtifactory.onArtifactUploaded", triggers[0].Name())
 }
 
 func Test__JFrogArtifactory__ListResources(t *testing.T) {
@@ -142,7 +143,7 @@ func Test__JFrogArtifactory__ListResources(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io/artifactory",
+				"url":         "https://mycompany.jfrog.io",
 				"accessToken": "test-token",
 			},
 		}

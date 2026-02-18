@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	registry.RegisterIntegration("jfrogArtifactory", &JFrogArtifactory{})
+	registry.RegisterIntegrationWithWebhookHandler("jfrogArtifactory", &JFrogArtifactory{}, &JFrogWebhookHandler{})
 }
 
 type JFrogArtifactory struct{}
@@ -43,7 +43,7 @@ func (j *JFrogArtifactory) Instructions() string {
 2. Go to **User Menu** (top right) -> **Edit Profile** -> **Authentication Settings**
 3. Click **Generate an Identity Token**
 4. Copy the token and paste it in the **Access Token** field below
-5. Enter your Artifactory base URL (e.g. https://mycompany.jfrog.io/artifactory)`
+5. Enter your JFrog Platform URL without the /artifactory suffix (e.g. https://mycompany.jfrog.io)`
 }
 
 func (j *JFrogArtifactory) Configuration() []configuration.Field {
@@ -53,8 +53,8 @@ func (j *JFrogArtifactory) Configuration() []configuration.Field {
 			Label:       "URL",
 			Type:        configuration.FieldTypeString,
 			Required:    true,
-			Description: "Artifactory instance URL",
-			Placeholder: "e.g. https://mycompany.jfrog.io/artifactory",
+			Description: "JFrog Platform URL (without /artifactory suffix)",
+			Placeholder: "e.g. https://mycompany.jfrog.io",
 		},
 		{
 			Name:        "accessToken",
@@ -76,7 +76,7 @@ func (j *JFrogArtifactory) Components() []core.Component {
 }
 
 func (j *JFrogArtifactory) Triggers() []core.Trigger {
-	return []core.Trigger{}
+	return []core.Trigger{&OnArtifactUploaded{}}
 }
 
 func (j *JFrogArtifactory) Sync(ctx core.SyncContext) error {

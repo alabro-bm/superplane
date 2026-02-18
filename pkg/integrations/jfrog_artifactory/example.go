@@ -16,6 +16,9 @@ var exampleOutputUploadArtifactBytes []byte
 //go:embed example_output_delete_artifact.json
 var exampleOutputDeleteArtifactBytes []byte
 
+//go:embed example_data_on_artifact_uploaded.json
+var exampleDataOnArtifactUploadedBytes []byte
+
 var exampleOutputGetArtifactInfoOnce sync.Once
 var exampleOutputGetArtifactInfo map[string]any
 
@@ -24,6 +27,9 @@ var exampleOutputUploadArtifact map[string]any
 
 var exampleOutputDeleteArtifactOnce sync.Once
 var exampleOutputDeleteArtifact map[string]any
+
+var exampleDataOnArtifactUploadedOnce sync.Once
+var exampleDataOnArtifactUploaded map[string]any
 
 func (g *GetArtifactInfo) ExampleOutput() map[string]any {
 	return utils.UnmarshalEmbeddedJSON(&exampleOutputGetArtifactInfoOnce, exampleOutputGetArtifactInfoBytes, &exampleOutputGetArtifactInfo)
@@ -35,4 +41,8 @@ func (u *UploadArtifact) ExampleOutput() map[string]any {
 
 func (d *DeleteArtifact) ExampleOutput() map[string]any {
 	return utils.UnmarshalEmbeddedJSON(&exampleOutputDeleteArtifactOnce, exampleOutputDeleteArtifactBytes, &exampleOutputDeleteArtifact)
+}
+
+func (t *OnArtifactUploaded) ExampleData() map[string]any {
+	return utils.UnmarshalEmbeddedJSON(&exampleDataOnArtifactUploadedOnce, exampleDataOnArtifactUploadedBytes, &exampleDataOnArtifactUploaded)
 }

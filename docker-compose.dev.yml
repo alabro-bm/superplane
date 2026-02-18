@@ -6,8 +6,6 @@ services:
       target: dev
 
     tty: true
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
     command: bash /app/docker-entrypoint.dev.sh
     environment:
@@ -80,7 +78,6 @@ services:
       OTEL_SERVICE_NAME: "superplane-dev"
       OWNER_SETUP_ENABLED: "yes"
       VITE_ENABLE_CUSTOM_COMPONENTS: "true"
-      BLOCKED_PRIVATE_IP_RANGES: ${BLOCKED_PRIVATE_IP_RANGES:-}
 
     ports:
       - ${VITE_DEV_PORT:-5173}:${VITE_DEV_PORT:-5173}

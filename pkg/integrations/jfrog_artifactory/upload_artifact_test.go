@@ -114,7 +114,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 						"path": "/com/example/artifact-1.0.jar",
 						"created": "2026-01-23T12:00:00.000Z",
 						"createdBy": "admin",
-						"downloadUri": "https://mycompany.jfrog.io/artifactory/libs-release-local/com/example/artifact-1.0.jar",
+						"downloadUri": "https://mycompany.jfrog.io/libs-release-local/com/example/artifact-1.0.jar",
 						"mimeType": "application/java-archive",
 						"size": "12345",
 						"checksums": {
@@ -122,7 +122,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 							"md5": "def456",
 							"sha256": "ghi789"
 						},
-						"uri": "https://mycompany.jfrog.io/artifactory/api/storage/libs-release-local/com/example/artifact-1.0.jar"
+						"uri": "https://mycompany.jfrog.io/api/storage/libs-release-local/com/example/artifact-1.0.jar"
 					}`)),
 				},
 			},
@@ -130,7 +130,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io/artifactory",
+				"url":    "https://mycompany.jfrog.io",
 				"accessToken": "test-token",
 			},
 		}
@@ -169,7 +169,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 
 		appCtx := &contexts.IntegrationContext{
 			Configuration: map[string]any{
-				"url":    "https://mycompany.jfrog.io/artifactory",
+				"url":    "https://mycompany.jfrog.io",
 				"accessToken": "test-token",
 			},
 		}
