@@ -203,7 +203,7 @@ type JFrogWebhookEventFilter struct {
 
 // JFrogWebhookCriteria represents filtering criteria for a JFrog webhook.
 type JFrogWebhookCriteria struct {
-	RepoKeys []string `json:"repo_keys,omitempty"`
+	RepoKeys []string `json:"repoKeys,omitempty"`
 }
 
 // JFrogWebhookHandlerDef represents a handler definition in a JFrog webhook.
