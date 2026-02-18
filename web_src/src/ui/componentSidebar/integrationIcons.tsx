@@ -28,6 +28,7 @@ import prometheusIcon from "@/assets/icons/integrations/prometheus.svg";
 import renderIcon from "@/assets/icons/integrations/render.svg";
 import dockerIcon from "@/assets/icons/integrations/docker.svg";
 import hetznerIcon from "@/assets/icons/integrations/hetzner.svg";
+import jfrogArtifactoryIcon from "@/assets/icons/integrations/jfrog-artifactory.svg";
 
 /** Integration type name (e.g. "github") → logo src. Used for Settings tab and header. */
 export const INTEGRATION_APP_LOGO_MAP: Record<string, string> = {
@@ -41,6 +42,8 @@ export const INTEGRATION_APP_LOGO_MAP: Record<string, string> = {
   github: githubIcon,
   gitlab: gitlabIcon,
   hetzner: hetznerIcon,
+  jfrogArtifactory: jfrogArtifactoryIcon,
+  jfrogartifactory: jfrogArtifactoryIcon,
   jira: jiraIcon,
   openai: openAiIcon,
   "open-ai": openAiIcon,
@@ -68,6 +71,7 @@ export const APP_LOGO_MAP: Record<string, string | Record<string, string>> = {
   github: githubIcon,
   gitlab: gitlabIcon,
   hetzner: hetznerIcon,
+  jfrogArtifactory: jfrogArtifactoryIcon,
   jira: jiraIcon,
   openai: openAiIcon,
   "open-ai": openAiIcon,
