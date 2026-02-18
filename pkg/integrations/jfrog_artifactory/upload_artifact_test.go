@@ -116,7 +116,7 @@ func Test__UploadArtifact__Execute(t *testing.T) {
 						"createdBy": "admin",
 						"downloadUri": "https://mycompany.jfrog.io/artifactory/libs-release-local/com/example/artifact-1.0.jar",
 						"mimeType": "application/java-archive",
-						"size": 12345,
+						"size": "12345",
 						"checksums": {
 							"sha1": "abc123",
 							"md5": "def456",

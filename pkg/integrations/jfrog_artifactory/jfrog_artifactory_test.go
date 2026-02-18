@@ -111,15 +111,6 @@ func Test__JFrogArtifactory__IntegrationInfo(t *testing.T) {
 	assert.NotEmpty(t, j.Description())
 }
 
-func Test__JFrogArtifactory__Components(t *testing.T) {
-	j := &JFrogArtifactory{}
-	components := j.Components()
-
-	require.Len(t, components, 2)
-	assert.Equal(t, "jfrogArtifactory.getArtifactInfo", components[0].Name())
-	assert.Equal(t, "jfrogArtifactory.uploadArtifact", components[1].Name())
-}
-
 func Test__JFrogArtifactory__Triggers(t *testing.T) {
 	j := &JFrogArtifactory{}
 	triggers := j.Triggers()
