@@ -306,22 +306,8 @@ type SyntheticCheckRetriesSpec struct {
 	Delay    string `json:"delay"`
 }
 
-// SyntheticCheckSummary is the minimal representation of a synthetic check returned by the list API.
-type SyntheticCheckSummary struct {
-	Metadata struct {
-		Name   string            `json:"name"`
-		Labels map[string]string `json:"labels"`
-	} `json:"metadata"`
-	Spec struct {
-		Plugin struct {
-			Display struct {
-				Name string `json:"name"`
-			} `json:"display"`
-		} `json:"plugin"`
-	} `json:"spec"`
-}
 
-func (c *Client) ListSyntheticChecks(dataset string) ([]SyntheticCheckSummary, error) {
+func (c *Client) ListSyntheticChecks(dataset string) ([]map[string]any, error) {
 	apiURL := fmt.Sprintf("%s/api/synthetic-checks?dataset=%s", c.BaseURL, url.QueryEscape(dataset))
 
 	responseBody, err := c.execRequest(http.MethodGet, apiURL, nil, "")
@@ -329,12 +315,21 @@ func (c *Client) ListSyntheticChecks(dataset string) ([]SyntheticCheckSummary, e
 		return nil, err
 	}
 
-	var checks []SyntheticCheckSummary
-	if err := json.Unmarshal(responseBody, &checks); err != nil {
-		return nil, fmt.Errorf("error parsing synthetic checks response: %v", err)
+	// Try bare array first
+	var items []map[string]any
+	if err := json.Unmarshal(responseBody, &items); err == nil {
+		return items, nil
 	}
 
-	return checks, nil
+	// Fall back to wrapped object e.g. {"items": [...]}
+	var wrapped struct {
+		Items []map[string]any `json:"items"`
+	}
+	if err := json.Unmarshal(responseBody, &wrapped); err != nil {
+		return nil, fmt.Errorf("error parsing synthetic checks response: %v (body: %s)", err, string(responseBody))
+	}
+
+	return wrapped.Items, nil
 }
 
 func (c *Client) CreateSyntheticCheck(request SyntheticCheckRequest, dataset string) (map[string]any, error) {

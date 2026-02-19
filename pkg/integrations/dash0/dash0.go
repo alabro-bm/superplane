@@ -150,10 +150,12 @@ func (d *Dash0) ListResources(resourceType string, ctx core.ListResourcesContext
 
 		resources := make([]core.IntegrationResource, 0, len(checks))
 		for _, check := range checks {
-			id := check.Metadata.Labels["dash0.com/id"]
-			name := check.Spec.Plugin.Display.Name
-			if name == "" {
-				name = check.Metadata.Name
+			id, name := extractSyntheticCheckIDAndName(check)
+			if id == "" {
+				id = name
+			}
+			if id == "" {
+				continue
 			}
 			resources = append(resources, core.IntegrationResource{
 				Type: resourceType,
@@ -167,6 +169,46 @@ func (d *Dash0) ListResources(resourceType string, ctx core.ListResourcesContext
 	default:
 		return []core.IntegrationResource{}, nil
 	}
+}
+
+// extractSyntheticCheckIDAndName extracts the check ID and display name from a raw
+// API response map, handling multiple possible Dash0 API response shapes.
+func extractSyntheticCheckIDAndName(check map[string]any) (id, name string) {
+	// Try metadata.labels["dash0.com/id"] and metadata.name
+	if metadata, ok := check["metadata"].(map[string]any); ok {
+		if metaName, ok := metadata["name"].(string); ok {
+			name = metaName
+		}
+		if labels, ok := metadata["labels"].(map[string]any); ok {
+			if labelID, ok := labels["dash0.com/id"].(string); ok {
+				id = labelID
+			}
+		}
+		// Try display name from spec.plugin.display.name
+		if spec, ok := check["spec"].(map[string]any); ok {
+			if plugin, ok := spec["plugin"].(map[string]any); ok {
+				if display, ok := plugin["display"].(map[string]any); ok {
+					if displayName, ok := display["name"].(string); ok && displayName != "" {
+						name = displayName
+					}
+				}
+			}
+		}
+	}
+
+	// Fallback: top-level "id" and "name" fields (flat API format)
+	if id == "" {
+		if topID, ok := check["id"].(string); ok {
+			id = topID
+		}
+	}
+	if name == "" {
+		if topName, ok := check["name"].(string); ok {
+			name = topName
+		}
+	}
+
+	return id, name
 }
 
 func (d *Dash0) HandleRequest(ctx core.HTTPRequestContext) {
