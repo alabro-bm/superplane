@@ -5,8 +5,12 @@ import awsLambdaIcon from "@/assets/icons/integrations/aws.lambda.svg";
 import awsEcsIcon from "@/assets/icons/integrations/aws.ecs.svg";
 import circleciIcon from "@/assets/icons/integrations/circleci.svg";
 import awsCloudwatchIcon from "@/assets/icons/integrations/aws.cloudwatch.svg";
-import awsRoute53Icon from "@/assets/icons/integrations/aws.route53.svg";
 import awsSnsIcon from "@/assets/icons/integrations/aws.sns.svg";
+import bitbucketIcon from "@/assets/icons/integrations/bitbucket.svg";
+import awsRoute53Icon from "@/assets/icons/integrations/aws.route53.svg";
+import awsEc2Icon from "@/assets/icons/integrations/aws.ec2.svg";
+import awsEcrIcon from "@/assets/icons/integrations/aws.ecr.svg";
+import awsCodeArtifactIcon from "@/assets/icons/integrations/aws.codeartifact.svg";
 import cloudflareIcon from "@/assets/icons/integrations/cloudflare.svg";
 import dash0Icon from "@/assets/icons/integrations/dash0.svg";
 import datadogIcon from "@/assets/icons/integrations/datadog.svg";
@@ -14,6 +18,7 @@ import daytonaIcon from "@/assets/icons/integrations/daytona.svg";
 import discordIcon from "@/assets/icons/integrations/discord.svg";
 import githubIcon from "@/assets/icons/integrations/github.svg";
 import gitlabIcon from "@/assets/icons/integrations/gitlab.svg";
+import grafanaIcon from "@/assets/icons/integrations/grafana.svg";
 import jiraIcon from "@/assets/icons/integrations/jira.svg";
 import openAiIcon from "@/assets/icons/integrations/openai.svg";
 import claudeIcon from "@/assets/icons/integrations/claude.svg";
@@ -29,10 +34,12 @@ import renderIcon from "@/assets/icons/integrations/render.svg";
 import dockerIcon from "@/assets/icons/integrations/docker.svg";
 import hetznerIcon from "@/assets/icons/integrations/hetzner.svg";
 import jfrogArtifactoryIcon from "@/assets/icons/integrations/jfrog-artifactory.svg";
+import statuspageIcon from "@/assets/icons/integrations/statuspage.svg";
 
 /** Integration type name (e.g. "github") → logo src. Used for Settings tab and header. */
 export const INTEGRATION_APP_LOGO_MAP: Record<string, string> = {
   aws: awsIcon,
+  bitbucket: bitbucketIcon,
   circleci: circleciIcon,
   cloudflare: cloudflareIcon,
   dash0: dash0Icon,
@@ -44,6 +51,7 @@ export const INTEGRATION_APP_LOGO_MAP: Record<string, string> = {
   hetzner: hetznerIcon,
   jfrogArtifactory: jfrogArtifactoryIcon,
   jfrogartifactory: jfrogArtifactoryIcon,
+  grafana: grafanaIcon,
   jira: jiraIcon,
   openai: openAiIcon,
   "open-ai": openAiIcon,
@@ -58,10 +66,12 @@ export const INTEGRATION_APP_LOGO_MAP: Record<string, string> = {
   prometheus: prometheusIcon,
   render: renderIcon,
   dockerhub: dockerIcon,
+  statuspage: statuspageIcon,
 };
 
 /** Block name first part (e.g. "github") or compound (e.g. aws.lambda) → logo src for header. */
 export const APP_LOGO_MAP: Record<string, string | Record<string, string>> = {
+  bitbucket: bitbucketIcon,
   circleci: circleciIcon,
   cloudflare: cloudflareIcon,
   dash0: dash0Icon,
@@ -72,6 +82,7 @@ export const APP_LOGO_MAP: Record<string, string | Record<string, string>> = {
   gitlab: gitlabIcon,
   hetzner: hetznerIcon,
   jfrogArtifactory: jfrogArtifactoryIcon,
+  grafana: grafanaIcon,
   jira: jiraIcon,
   openai: openAiIcon,
   "open-ai": openAiIcon,
@@ -81,13 +92,18 @@ export const APP_LOGO_MAP: Record<string, string | Record<string, string>> = {
   rootly: rootlyIcon,
   semaphore: SemaphoreLogo,
   slack: slackIcon,
+  smtp: smtpIcon,
   sendgrid: sendgridIcon,
   prometheus: prometheusIcon,
   render: renderIcon,
   dockerhub: dockerIcon,
+  statuspage: statuspageIcon,
   aws: {
     cloudwatch: awsCloudwatchIcon,
+    codeArtifact: awsCodeArtifactIcon,
+    ecr: awsEcrIcon,
     lambda: awsLambdaIcon,
+    ec2: awsEc2Icon,
     route53: awsRoute53Icon,
     ecs: awsEcsIcon,
     sns: awsSnsIcon,
@@ -119,7 +135,7 @@ export function getHeaderIconSrc(blockName: string | undefined): string | undefi
     const nested = appLogo[nameParts[1]];
     if (nested) return nested;
   }
-  // AWS has a nested map (lambda only); use main AWS icon for other aws.* components
+  // Use main AWS icon for aws.* components without a dedicated sub-icon mapping.
   if (first === "aws") return getIntegrationIconSrc("aws");
   return undefined;
 }
