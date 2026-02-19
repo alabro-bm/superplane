@@ -306,7 +306,6 @@ type SyntheticCheckRetriesSpec struct {
 	Delay    string `json:"delay"`
 }
 
-
 func (c *Client) ListSyntheticChecks(dataset string) ([]map[string]any, error) {
 	apiURL := fmt.Sprintf("%s/api/synthetic-checks?dataset=%s", c.BaseURL, url.QueryEscape(dataset))
 
