@@ -3,7 +3,6 @@ package jfrogartifactory
 import (
 	"fmt"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/superplanehq/superplane/pkg/configuration"
 	"github.com/superplanehq/superplane/pkg/core"
 	"github.com/superplanehq/superplane/pkg/registry"
@@ -14,11 +13,6 @@ func init() {
 }
 
 type JFrogArtifactory struct{}
-
-type Configuration struct {
-	URL         string `json:"url"`
-	AccessToken string `json:"accessToken"`
-}
 
 func (j *JFrogArtifactory) Name() string {
 	return "jfrogArtifactory"
@@ -80,16 +74,21 @@ func (j *JFrogArtifactory) Triggers() []core.Trigger {
 }
 
 func (j *JFrogArtifactory) Sync(ctx core.SyncContext) error {
-	config := Configuration{}
-	if err := mapstructure.Decode(ctx.Configuration, &config); err != nil {
-		return fmt.Errorf("failed to decode configuration: %v", err)
-	}
-
-	if config.URL == "" {
+	rawURL, err := ctx.Integration.GetConfig("url")
+	if err != nil {
 		return fmt.Errorf("url is required")
 	}
 
-	if config.AccessToken == "" {
+	if string(rawURL) == "" {
+		return fmt.Errorf("url is required")
+	}
+
+	accessToken, err := ctx.Integration.GetConfig("accessToken")
+	if err != nil {
+		return fmt.Errorf("accessToken is required")
+	}
+
+	if string(accessToken) == "" {
 		return fmt.Errorf("accessToken is required")
 	}
 

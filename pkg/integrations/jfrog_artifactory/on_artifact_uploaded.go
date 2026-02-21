@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/superplanehq/superplane/pkg/configuration"
@@ -101,8 +100,6 @@ func (t *OnArtifactUploaded) HandleWebhook(ctx core.WebhookRequestContext) (int,
 		return http.StatusForbidden, fmt.Errorf("missing X-JFrog-Event-Auth header")
 	}
 
-	signature = strings.TrimPrefix(signature, "sha256=")
-
 	secret, err := ctx.Webhook.GetSecret()
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("error getting webhook secret: %v", err)
@@ -118,6 +115,15 @@ func (t *OnArtifactUploaded) HandleWebhook(ctx core.WebhookRequestContext) (int,
 	}
 
 	if payload.EventType != "deployed" {
+		return http.StatusOK, nil
+	}
+
+	var config OnArtifactUploadedConfiguration
+	if err := mapstructure.Decode(ctx.Configuration, &config); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to decode configuration: %w", err)
+	}
+
+	if config.Repository != "" && payload.Data.RepoKey != config.Repository {
 		return http.StatusOK, nil
 	}
 

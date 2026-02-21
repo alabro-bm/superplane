@@ -55,6 +55,10 @@ func (h *JFrogWebhookHandler) Cleanup(ctx core.WebhookHandlerContext) error {
 		return fmt.Errorf("failed to decode webhook metadata: %v", err)
 	}
 
+	if metadata.Key == "" {
+		return nil
+	}
+
 	if err := client.DeleteWebhook(metadata.Key); err != nil {
 		return fmt.Errorf("error deleting webhook from JFrog: %v", err)
 	}

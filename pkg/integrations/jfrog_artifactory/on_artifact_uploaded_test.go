@@ -199,4 +199,62 @@ func Test__OnArtifactUploaded__HandleWebhook(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, events.Count())
 	})
+
+	t.Run("deployed event with matching repo filter -> emits event", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]any{
+			"domain":     "artifact",
+			"event_type": "deployed",
+			"data": map[string]any{
+				"repo_key": "libs-release-local",
+				"path":     "com/example/artifact-1.0.jar",
+				"name":     "artifact-1.0.jar",
+				"size":     12345,
+				"sha256":   "abc123",
+			},
+		})
+
+		secret := "test-secret"
+		events := &contexts.EventContext{}
+		code, err := trigger.HandleWebhook(core.WebhookRequestContext{
+			Headers:       jfrogHeaders(secret, body),
+			Body:          body,
+			Configuration: map[string]any{"repository": "libs-release-local"},
+			Webhook:       &contexts.WebhookContext{Secret: secret},
+			Events:        events,
+			Logger:        log.NewEntry(log.New()),
+		})
+
+		assert.Equal(t, http.StatusOK, code)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, events.Count())
+	})
+
+	t.Run("deployed event with non-matching repo filter -> skipped", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]any{
+			"domain":     "artifact",
+			"event_type": "deployed",
+			"data": map[string]any{
+				"repo_key": "libs-snapshot-local",
+				"path":     "com/example/artifact-1.0.jar",
+				"name":     "artifact-1.0.jar",
+				"size":     12345,
+				"sha256":   "abc123",
+			},
+		})
+
+		secret := "test-secret"
+		events := &contexts.EventContext{}
+		code, err := trigger.HandleWebhook(core.WebhookRequestContext{
+			Headers:       jfrogHeaders(secret, body),
+			Body:          body,
+			Configuration: map[string]any{"repository": "libs-release-local"},
+			Webhook:       &contexts.WebhookContext{Secret: secret},
+			Events:        events,
+			Logger:        log.NewEntry(log.New()),
+		})
+
+		assert.Equal(t, http.StatusOK, code)
+		assert.NoError(t, err)
+		assert.Zero(t, events.Count())
+	})
 }

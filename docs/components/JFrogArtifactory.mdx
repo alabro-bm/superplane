@@ -48,11 +48,15 @@ The On Artifact Uploaded trigger starts a workflow execution when an artifact is
 
 ```json
 {
-  "name": "artifact-1.0.jar",
-  "path": "com/example/artifact-1.0.jar",
-  "repo": "libs-release-local",
-  "sha256": "abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567",
-  "size": 12345
+  "type": "jfrogArtifactory.artifactUploaded",
+  "data": {
+    "name": "artifact-1.0.jar",
+    "path": "com/example/artifact-1.0.jar",
+    "repo": "libs-release-local",
+    "sha256": "abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567",
+    "size": 12345
+  },
+  "timestamp": "2026-01-23T12:00:00Z"
 }
 ```
 

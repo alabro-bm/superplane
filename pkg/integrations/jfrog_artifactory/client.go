@@ -268,7 +268,11 @@ func (c *Client) CreateWebhook(webhookURL, secret, repoKey string) (string, erro
 	}
 
 	var resp CreateWebhookResponse
-	if err := json.Unmarshal(responseBody, &resp); err != nil || resp.Key == "" {
+	if err := json.Unmarshal(responseBody, &resp); err != nil {
+		return "", fmt.Errorf("error parsing webhook response: %v", err)
+	}
+
+	if resp.Key == "" {
 		return key, nil
 	}
 

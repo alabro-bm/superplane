@@ -59,7 +59,6 @@ export const INTEGRATION_APP_LOGO_MAP: Record<string, string> = {
   gitlab: gitlabIcon,
   hetzner: hetznerIcon,
   jfrogArtifactory: jfrogArtifactoryIcon,
-  jfrogartifactory: jfrogArtifactoryIcon,
   grafana: grafanaIcon,
   jira: jiraIcon,
   openai: openAiIcon,
