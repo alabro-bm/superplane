@@ -17,7 +17,6 @@ import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 <CardGrid>
   <LinkCard title="Delete Artifact" href="#delete-artifact" description="Delete an artifact from JFrog Artifactory" />
   <LinkCard title="Get Artifact Info" href="#get-artifact-info" description="Get metadata about an artifact in JFrog Artifactory" />
-  <LinkCard title="Upload Artifact" href="#upload-artifact" description="Upload an artifact to JFrog Artifactory" />
 </CardGrid>
 
 ## Instructions
@@ -138,53 +137,6 @@ Returns artifact metadata including repository, path, size, checksums, download 
   },
   "timestamp": "2026-01-23T12:00:00Z",
   "type": "jfrogArtifactory.artifact.info"
-}
-```
-
-<a id="upload-artifact"></a>
-
-## Upload Artifact
-
-The Upload Artifact component deploys an artifact to a JFrog Artifactory repository.
-
-### Use Cases
-
-- **CI/CD publishing**: Upload build artifacts to Artifactory as part of a pipeline
-- **Release management**: Deploy versioned artifacts to release repositories
-- **Configuration distribution**: Push configuration files to shared repositories
-
-### Configuration
-
-- **Repository**: Select the target Artifactory repository
-- **Path**: The destination path for the artifact (supports expressions)
-- **Content**: The artifact content to upload (supports expressions for piping data from previous nodes)
-- **Content Type**: Optional MIME type (defaults to application/octet-stream)
-
-### Output
-
-Returns deploy metadata including repository, path, size, checksums, and download URI.
-
-### Example Output
-
-```json
-{
-  "data": {
-    "checksums": {
-      "md5": "d41d8cd98f00b204e9800998ecf8427e",
-      "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    "created": "2026-01-23T12:00:00.000Z",
-    "createdBy": "admin",
-    "downloadUri": "https://mycompany.jfrog.io/artifactory/libs-release-local/com/example/artifact/1.0/artifact-1.0.jar",
-    "mimeType": "application/java-archive",
-    "path": "/com/example/artifact/1.0/artifact-1.0.jar",
-    "repo": "libs-release-local",
-    "size": 12345,
-    "uri": "https://mycompany.jfrog.io/artifactory/api/storage/libs-release-local/com/example/artifact/1.0/artifact-1.0.jar"
-  },
-  "timestamp": "2026-01-23T12:00:00Z",
-  "type": "jfrogArtifactory.artifact.uploaded"
 }
 ```
 

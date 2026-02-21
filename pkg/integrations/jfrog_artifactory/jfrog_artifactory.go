@@ -64,7 +64,6 @@ func (j *JFrogArtifactory) Configuration() []configuration.Field {
 func (j *JFrogArtifactory) Components() []core.Component {
 	return []core.Component{
 		&GetArtifactInfo{},
-		&UploadArtifact{},
 		&DeleteArtifact{},
 	}
 }

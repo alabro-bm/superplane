@@ -173,19 +173,6 @@ func (c *Client) GetArtifactInfo(repoKey, path string) (*ArtifactInfo, error) {
 	return &info, nil
 }
 
-// DeployResponse represents the response from deploying an artifact.
-type DeployResponse struct {
-	Repo        string            `json:"repo"`
-	Path        string            `json:"path"`
-	Created     string            `json:"created"`
-	CreatedBy   string            `json:"createdBy"`
-	DownloadURI string            `json:"downloadUri"`
-	MimeType    string            `json:"mimeType"`
-	Size        string            `json:"size"`
-	Checksums   *ArtifactChecksum `json:"checksums"`
-	URI         string            `json:"uri"`
-}
-
 // DeleteArtifact removes an artifact from the specified repository and path.
 func (c *Client) DeleteArtifact(repoKey, path string) error {
 	path = strings.TrimPrefix(path, "/")
@@ -284,25 +271,4 @@ func (c *Client) CreateWebhook(webhookURL, secret, repoKey string) (string, erro
 func (c *Client) DeleteWebhook(key string) error {
 	_, _, err := c.execRequest(http.MethodDelete, c.platformURL(fmt.Sprintf("/event/api/v1/subscriptions/%s", key)), nil, "", http.StatusNoContent, http.StatusNotFound)
 	return err
-}
-
-// DeployArtifact uploads an artifact to the specified repository and path.
-func (c *Client) DeployArtifact(repoKey, path string, content io.Reader, contentType string) (*DeployResponse, error) {
-	path = strings.TrimPrefix(path, "/")
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
-
-	requestURL := c.apiURL(fmt.Sprintf("/%s/%s", repoKey, path))
-	_, responseBody, err := c.execRequest(http.MethodPut, requestURL, content, contentType, http.StatusCreated)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp DeployResponse
-	if err := json.Unmarshal(responseBody, &resp); err != nil {
-		return nil, fmt.Errorf("error parsing deploy response: %v", err)
-	}
-
-	return &resp, nil
 }
