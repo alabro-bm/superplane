@@ -6,8 +6,8 @@ import { listIssuesMapper, LIST_ISSUES_STATE_REGISTRY } from "./list_issues";
 import { createHttpSyntheticCheckMapper } from "./create_http_synthetic_check";
 import { updateHttpSyntheticCheckMapper } from "./update_http_synthetic_check";
 import { deleteHttpSyntheticCheckMapper } from "./delete_http_synthetic_check";
-import { onNotificationTriggerRenderer } from "./on_notification";
 import { buildActionStateRegistry } from "../utils";
+import { onNotificationTriggerRenderer } from "./on_notification";
 
 export const componentMappers: Record<string, ComponentBaseMapper> = {
   queryPrometheus: queryPrometheusMapper,

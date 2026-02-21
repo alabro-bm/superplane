@@ -4,13 +4,13 @@ title: "Dash0"
 
 Connect to Dash0 to query data using Prometheus API
 
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
 ## Triggers
 
 <CardGrid>
-  <LinkCard title="On Notification" href="#on-notification" description="Trigger a workflow when Dash0 sends a notification" />
+  <LinkCard title="On Notification" href="#on-notification" description="Listen to Dash0 notification webhook events" />
 </CardGrid>
-
-import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 ## Actions
 
@@ -22,48 +22,77 @@ import { CardGrid, LinkCard } from "@astrojs/starlight/components";
   <LinkCard title="Update HTTP Synthetic Check" href="#update-http-synthetic-check" description="Update an existing HTTP synthetic check in Dash0 by ID" />
 </CardGrid>
 
-## Instructions
-
-To set up the Dash0 integration:
-
-1. Go to your Dash0 dashboard -> **Organization Settings** -> **API Tokens**
-2. Click **Create API Token**, give it a name, and copy the token
-3. Paste the token in the **API Token** field below
-4. Copy your **Prometheus API Base URL** from **Organization Settings** -> **Endpoints** -> **Prometheus API**
-
-### Webhook Setup (for triggers)
-
-To receive Dash0 notifications:
-
-1. After connecting, copy the **Webhook URL** shown on the integration details page
-2. In your Dash0 dashboard, go to **Alerting** -> **Notification Channels**
-3. Create a new channel with type **Webhook**
-4. Paste the webhook URL and save
-
 <a id="on-notification"></a>
 
 ## On Notification
 
-The On Notification trigger starts a workflow execution when Dash0 sends a notification to SuperPlane.
+The On Notification trigger starts a workflow execution when Dash0 sends a notification webhook.
 
 ### Setup
 
-1. Go to the Dash0 integration settings in SuperPlane and copy the webhook URL shown there.
-2. In your Dash0 account, configure a notification channel using that URL.
-3. When Dash0 sends a notification (e.g. a synthetic check failure), this trigger will fire.
+1. Configure the Dash0 integration in SuperPlane.
+2. Copy the webhook URL shown in the integration configuration.
+3. In Dash0, configure notifications to send HTTP POST requests to that URL.
 
-### Output
+### Event Data
 
-Emits the raw Dash0 notification payload as `dash0.notification`.
+The trigger emits the full JSON payload received from Dash0 as `dash0.notification`.
 
 ### Example Data
 
 ```json
 {
-  "checkName": "Login API health check",
-  "severity": "critical",
-  "timestamp": "2026-01-19T12:00:00Z",
-  "type": "synthetic-check-failed"
+  "data": {
+    "issue": {
+      "checkrules": [
+        {
+          "annotations": {
+            "summary": "High error rate detected"
+          },
+          "description": "Alert when API error rate is high",
+          "expression": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) \u003e 0.05",
+          "for": "5m",
+          "id": "check_456",
+          "interval": "1m",
+          "keepFiringFor": "10m",
+          "labels": {
+            "env": "prod",
+            "service": "api"
+          },
+          "name": "API availability",
+          "thresholds": {
+            "critical": 0.05
+          },
+          "url": "https://app.dash0.com/check-rules/check_456"
+        }
+      ],
+      "dataset": "default",
+      "description": "Error rate exceeded threshold for API availability check.",
+      "end": "",
+      "id": "issue_123",
+      "issueIdentifier": "availability-api-high-error-rate",
+      "labels": [
+        {
+          "key": "service",
+          "value": {
+            "stringValue": "api"
+          }
+        },
+        {
+          "key": "env",
+          "value": {
+            "stringValue": "prod"
+          }
+        }
+      ],
+      "start": "2026-02-20T12:00:00Z",
+      "status": "critical",
+      "summary": "High error rate on API availability check",
+      "url": "https://app.dash0.com/issues/issue_123"
+    }
+  },
+  "timestamp": "2026-02-20T12:00:00Z",
+  "type": "dash0.notification"
 }
 ```
 

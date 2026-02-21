@@ -19,13 +19,16 @@ import bitbucketIcon from "@/assets/icons/integrations/bitbucket.svg";
 import dash0Icon from "@/assets/icons/integrations/dash0.svg";
 import daytonaIcon from "@/assets/icons/integrations/daytona.svg";
 import datadogIcon from "@/assets/icons/integrations/datadog.svg";
+import digitaloceanIcon from "@/assets/icons/integrations/digitalocean.svg";
 import discordIcon from "@/assets/icons/integrations/discord.svg";
+import telegramIcon from "@/assets/icons/integrations/telegram.svg";
 import githubIcon from "@/assets/icons/integrations/github.svg";
 import gitlabIcon from "@/assets/icons/integrations/gitlab.svg";
 import jiraIcon from "@/assets/icons/integrations/jira.svg";
 import grafanaIcon from "@/assets/icons/integrations/grafana.svg";
 import openAiIcon from "@/assets/icons/integrations/openai.svg";
 import claudeIcon from "@/assets/icons/integrations/claude.svg";
+import gcpIcon from "@/assets/icons/integrations/gcp.svg";
 import cursorIcon from "@/assets/icons/integrations/cursor.svg";
 import pagerDutyIcon from "@/assets/icons/integrations/pagerduty.svg";
 import slackIcon from "@/assets/icons/integrations/slack.svg";
@@ -37,6 +40,7 @@ import awsEcrIcon from "@/assets/icons/integrations/aws.ecr.svg";
 import awsEcsIcon from "@/assets/icons/integrations/aws.ecs.svg";
 import awsCodeArtifactIcon from "@/assets/icons/integrations/aws.codeartifact.svg";
 import awsCloudwatchIcon from "@/assets/icons/integrations/aws.cloudwatch.svg";
+import awsCodePipelineIcon from "@/assets/icons/integrations/aws.codepipeline.svg";
 import awsSnsIcon from "@/assets/icons/integrations/aws.sns.svg";
 import rootlyIcon from "@/assets/icons/integrations/rootly.svg";
 import SemaphoreLogo from "@/assets/semaphore-logo-sign-black.svg";
@@ -44,8 +48,11 @@ import sendgridIcon from "@/assets/icons/integrations/sendgrid.svg";
 import prometheusIcon from "@/assets/icons/integrations/prometheus.svg";
 import renderIcon from "@/assets/icons/integrations/render.svg";
 import dockerIcon from "@/assets/icons/integrations/docker.svg";
+import awsSqsIcon from "@/assets/icons/integrations/aws.sqs.svg";
 import hetznerIcon from "@/assets/icons/integrations/hetzner.svg";
 import jfrogArtifactoryIcon from "@/assets/icons/integrations/jfrog-artifactory.svg";
+import harnessIcon from "@/assets/icons/integrations/harness.svg";
+import servicenowIcon from "@/assets/icons/integrations/servicenow.svg";
 import statuspageIcon from "@/assets/icons/integrations/statuspage.svg";
 
 export interface BuildingBlock {
@@ -412,6 +419,7 @@ function CategorySection({
     dash0: dash0Icon,
     datadog: datadogIcon,
     daytona: daytonaIcon,
+    digitalocean: digitaloceanIcon,
     discord: discordIcon,
     github: githubIcon,
     gitlab: gitlabIcon,
@@ -427,10 +435,13 @@ function CategorySection({
     rootly: rootlyIcon,
     semaphore: SemaphoreLogo,
     slack: slackIcon,
+    telegram: telegramIcon,
     sendgrid: sendgridIcon,
     prometheus: prometheusIcon,
     render: renderIcon,
     dockerhub: dockerIcon,
+    harness: harnessIcon,
+    servicenow: servicenowIcon,
     statuspage: statuspageIcon,
     aws: {
       ec2: awsEc2Icon,
@@ -438,10 +449,12 @@ function CategorySection({
       cloudwatch: awsCloudwatchIcon,
       lambda: awsLambdaIcon,
       ecr: awsEcrIcon,
+      sqs: awsSqsIcon,
       route53: awsRoute53Icon,
       ecs: awsEcsIcon,
       sns: awsSnsIcon,
     },
+    gcp: gcpIcon,
   };
 
   // Get integration name from first block if available, or match category name
@@ -499,6 +512,7 @@ function CategorySection({
             dash0: dash0Icon,
             daytona: daytonaIcon,
             datadog: datadogIcon,
+            digitalocean: digitaloceanIcon,
             discord: discordIcon,
             github: githubIcon,
             gitlab: gitlabIcon,
@@ -513,21 +527,27 @@ function CategorySection({
             rootly: rootlyIcon,
             semaphore: SemaphoreLogo,
             slack: slackIcon,
+            telegram: telegramIcon,
             sendgrid: sendgridIcon,
             prometheus: prometheusIcon,
             render: renderIcon,
             dockerhub: dockerIcon,
+            harness: harnessIcon,
+            servicenow: servicenowIcon,
             statuspage: statuspageIcon,
             aws: {
               codeArtifact: awsCodeArtifactIcon,
+              codepipeline: awsCodePipelineIcon,
               cloudwatch: awsCloudwatchIcon,
               ecr: awsEcrIcon,
               ec2: awsEc2Icon,
               lambda: awsLambdaIcon,
+              sqs: awsSqsIcon,
               route53: awsRoute53Icon,
               ecs: awsEcsIcon,
               sns: awsSnsIcon,
             },
+            gcp: gcpIcon,
           };
           const appLogo = nameParts[0] ? appLogoMap[nameParts[0]] : undefined;
           const appIconSrc = typeof appLogo === "string" ? appLogo : nameParts[1] ? appLogo?.[nameParts[1]] : undefined;

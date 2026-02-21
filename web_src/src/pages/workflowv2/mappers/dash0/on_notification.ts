@@ -1,45 +1,96 @@
+import { getBackgroundColorClass } from "@/utils/colors";
+import { formatTimeAgo } from "@/utils/date";
 import { TriggerEventContext, TriggerRenderer, TriggerRendererContext } from "../types";
 import { TriggerProps } from "@/ui/trigger";
-import { getBackgroundColorClass, getColorClass } from "@/utils/colors";
-import { formatTimeAgo } from "@/utils/date";
 import dash0Icon from "@/assets/icons/integrations/dash0.svg";
-import { OnNotificationPayload } from "./types";
+import { stringOrDash } from "../utils";
+
+interface Dash0NotificationIssue {
+  id?: string;
+  issueIdentifier?: string;
+  status?: string;
+  summary?: string;
+  start?: string;
+  end?: string;
+  url?: string;
+  dataset?: string;
+  description?: string;
+  labels?: IssueLabel[];
+}
+
+interface IssueLabel {
+  key?: string;
+  value?: IssueLabelValue;
+}
+
+interface IssueLabelValue {
+  stringValue?: string;
+}
+
+interface Dash0NotificationEventData {
+  issue?: Dash0NotificationIssue;
+}
+
+interface OnNotificationConfiguration {
+  statuses?: string[];
+}
 
 export const onNotificationTriggerRenderer: TriggerRenderer = {
   getTitleAndSubtitle: (context: TriggerEventContext): { title: string; subtitle: string } => {
-    const eventData = context.event?.data as OnNotificationPayload;
+    const eventData = context.event?.data as Dash0NotificationEventData | undefined;
+    const issue = eventData?.issue;
+    const title = issue?.summary || issue?.issueIdentifier || issue?.id || "Dash0 notification";
+    const subtitleParts = [issue?.status].filter(Boolean).join(" · ");
+    const timeAgo = context.event?.createdAt ? formatTimeAgo(new Date(context.event.createdAt)) : "";
+    const subtitle = subtitleParts && timeAgo ? `${subtitleParts} · ${timeAgo}` : subtitleParts || timeAgo;
+
     return {
-      title: buildEventTitle(eventData),
-      subtitle: buildEventSubtitle(eventData, context.event?.createdAt),
+      title,
+      subtitle,
     };
   },
 
-  getRootEventValues: (context: TriggerEventContext): Record<string, any> => {
-    const eventData = context.event?.data as OnNotificationPayload;
-    const values: Record<string, string> = {};
-    if (eventData?.type) values["Type"] = eventData.type;
-    if (eventData?.checkName) values["Check Name"] = eventData.checkName;
-    if (eventData?.severity) values["Severity"] = eventData.severity;
-    if (eventData?.timestamp) values["Timestamp"] = eventData.timestamp;
-    return values;
+  getRootEventValues: (context: TriggerEventContext): Record<string, string> => {
+    const eventData = context.event?.data as Dash0NotificationEventData | undefined;
+
+    return {
+      "Issue ID": stringOrDash(eventData?.issue?.id),
+      "Issue Identifier": stringOrDash(eventData?.issue?.issueIdentifier),
+      URL: stringOrDash(eventData?.issue?.url),
+      Status: stringOrDash(eventData?.issue?.status),
+      Summary: stringOrDash(eventData?.issue?.summary),
+      Dataset: stringOrDash(eventData?.issue?.dataset),
+      Start: stringOrDash(eventData?.issue?.start),
+      Labels: stringOrDash(
+        eventData?.issue?.labels?.map((label) => `${label.key}: ${label.value?.stringValue}`).join(", "),
+      ),
+    };
   },
 
-  getTriggerProps: (context: TriggerRendererContext): TriggerProps => {
+  getTriggerProps: (context: TriggerRendererContext) => {
     const { node, definition, lastEvent } = context;
+    const configuration = node.configuration as OnNotificationConfiguration | undefined;
+    const metadataItems = [];
+
+    if (configuration?.statuses?.length) {
+      metadataItems.push({
+        icon: "funnel",
+        label: `Statuses: ${configuration.statuses.join(", ")}`,
+      });
+    }
 
     const props: TriggerProps = {
       title: node.name || definition.label || "Unnamed trigger",
       iconSrc: dash0Icon,
-      iconColor: getColorClass(definition.color),
       collapsedBackground: getBackgroundColorClass(definition.color),
-      metadata: [],
+      metadata: metadataItems,
     };
 
     if (lastEvent) {
-      const eventData = lastEvent.data as OnNotificationPayload;
+      const { title, subtitle } = onNotificationTriggerRenderer.getTitleAndSubtitle({ event: lastEvent });
       props.lastEventData = {
-        title: buildEventTitle(eventData),
-        subtitle: buildEventSubtitle(eventData, lastEvent.createdAt),
+        title,
+        subtitle,
         receivedAt: new Date(lastEvent.createdAt),
         state: "triggered",
         eventId: lastEvent.id,
@@ -49,25 +100,3 @@ export const onNotificationTriggerRenderer: TriggerRenderer = {
     return props;
   },
 };
-
-function buildEventTitle(eventData: OnNotificationPayload): string {
-  const type = eventData?.type || "Notification";
-  if (eventData?.checkName) {
-    return `${type} · ${eventData.checkName}`;
-  }
-  return type;
-}
-
-function buildEventSubtitle(eventData: OnNotificationPayload, createdAt?: string): string {
-  const parts: string[] = [];
-
-  if (eventData?.severity) {
-    parts.push(eventData.severity);
-  }
-
-  if (createdAt) {
-    parts.push(formatTimeAgo(new Date(createdAt)));
-  }
-
-  return parts.join(" · ");
-}

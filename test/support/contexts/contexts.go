@@ -165,10 +165,6 @@ func (c *IntegrationContext) RequestWebhook(configuration any) error {
 	return nil
 }
 
-func (c *IntegrationContext) EnsureIntegrationWebhook(configuration any) (*uuid.UUID, error) {
-	return nil, nil
-}
-
 func (c *IntegrationContext) ScheduleResync(interval time.Duration) error {
 	c.ResyncRequests = append(c.ResyncRequests, interval)
 	return nil
@@ -180,7 +176,11 @@ func (c *IntegrationContext) ScheduleActionCall(actionName string, parameters an
 }
 
 func (c *IntegrationContext) ListSubscriptions() ([]core.IntegrationSubscriptionContext, error) {
-	return nil, nil
+	subscriptions := make([]core.IntegrationSubscriptionContext, 0, len(c.Subscriptions))
+	for _, subscription := range c.Subscriptions {
+		subscriptions = append(subscriptions, &SubscriptionContext{config: subscription.Configuration})
+	}
+	return subscriptions, nil
 }
 
 func (c *IntegrationContext) FindSubscription(predicate func(core.IntegrationSubscriptionContext) bool) (core.IntegrationSubscriptionContext, error) {
@@ -191,6 +191,20 @@ func (c *IntegrationContext) Subscribe(subscription any) (*uuid.UUID, error) {
 	s := Subscription{ID: uuid.New(), Configuration: subscription}
 	c.Subscriptions = append(c.Subscriptions, s)
 	return &s.ID, nil
+}
+
+type SubscriptionContext struct {
+	config   any
+	messages []any
+}
+
+func (s *SubscriptionContext) Configuration() any {
+	return s.config
+}
+
+func (s *SubscriptionContext) SendMessage(message any) error {
+	s.messages = append(s.messages, message)
+	return nil
 }
 
 type ExecutionStateContext struct {
