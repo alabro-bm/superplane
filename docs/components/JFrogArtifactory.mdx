@@ -4,13 +4,13 @@ title: "JFrog Artifactory"
 
 Manage artifacts in JFrog Artifactory repositories
 
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
 ## Triggers
 
 <CardGrid>
   <LinkCard title="On Artifact Uploaded" href="#on-artifact-uploaded" description="Triggers when an artifact is deployed to JFrog Artifactory" />
 </CardGrid>
-
-import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 ## Actions
 
@@ -47,7 +47,6 @@ The On Artifact Uploaded trigger starts a workflow execution when an artifact is
 
 ```json
 {
-  "type": "jfrogArtifactory.artifactUploaded",
   "data": {
     "name": "artifact-1.0.jar",
     "path": "com/example/artifact-1.0.jar",
@@ -55,7 +54,8 @@ The On Artifact Uploaded trigger starts a workflow execution when an artifact is
     "sha256": "abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567",
     "size": 12345
   },
-  "timestamp": "2026-01-23T12:00:00Z"
+  "timestamp": "2026-01-23T12:00:00Z",
+  "type": "jfrogArtifactory.artifactUploaded"
 }
 ```
 
